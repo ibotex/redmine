@@ -26,15 +26,16 @@ namespace :redmine do
     module TracMigrate
         TICKET_MAP = []
 
-        DEFAULT_STATUS = IssueStatus.default
-        assigned_status = IssueStatus.find_by_id(10) #numbers from db!
-        resolved_status = IssueStatus.find_by_id(8)
-        feedback_status = IssueStatus.find_by_id(4)
-        accepted_status = IssueStatus.find_by_id(9)
-        closed_status = IssueStatus.find_by_id(5)
+        DEFAULT_STATUS = IssueStatus.default		 # 1
+        assigned_status = IssueStatus.find_by_id(10) # - ; numbers from db!
+        resolved_status = IssueStatus.find_by_id(8)  # 3
+        feedback_status = IssueStatus.find_by_id(4)  # 4
+        accepted_status = IssueStatus.find_by_id(9)  # -
+        closed_status = IssueStatus.find_by_id(5)    # 5
         STATUS_MAPPING = {'new' => DEFAULT_STATUS,
                           'reopened' => feedback_status,
                           'assigned' => assigned_status,
+                          'resolved' => resolved_status,
                           'accepted' => accepted_status,
                           'closed' => closed_status
                           }
