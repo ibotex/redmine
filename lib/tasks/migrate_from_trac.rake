@@ -41,18 +41,18 @@ namespace :redmine do
                           }
 
         priorities = IssuePriority.all
-        DEFAULT_PRIORITY = priorities[0]
-        PRIORITY_MAPPING = {'lowest' => priorities[0],
+        DEFAULT_PRIORITY = priorities[1]
+        PRIORITY_MAPPING = {'lowest' => priorities[0], #ID in DB: 1-low 2-normal 3-high
                             'low' => priorities[0],
                             'normal' => priorities[1],
                             'high' => priorities[2],
-                            'highest' => priorities[3],
+                            'highest' => priorities[2],
                             # ---
                             'trivial' => priorities[0],
                             'minor' => priorities[1],
                             'major' => priorities[2],
-                            'critical' => priorities[3],
-                            'blocker' => priorities[4]
+                            'critical' => priorities[2],
+                            'blocker' => priorities[2]
                             }
 
         TRACKER_BUG = Tracker.find_by_id(1)
