@@ -76,6 +76,7 @@ namespace :redmine do
             real_now - @fake_diff.to_i
           end
           def fake(time)
+            time = 0 if time.nil?
             @fake_diff = real_now - time
             res = yield
             @fake_diff = 0
