@@ -549,6 +549,8 @@ namespace :redmine do
           end
           i.custom_field_values = custom_values
           i.save_custom_field_values
+          i.created_on = ticket.time
+		  Time.fake(ticket.changetime) { i.save }
         end
 
         # update issue id sequence if needed (postgresql)
