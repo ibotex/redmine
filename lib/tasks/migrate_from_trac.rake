@@ -52,12 +52,13 @@ namespace :redmine do
                             'blocker' => priorities[4]
                             }
 
-        TRACKER_BUG = Tracker.find_by_position(1)
-        TRACKER_FEATURE = Tracker.find_by_position(2)
+        TRACKER_BUG = Tracker.find_by_id(1)
+        TRACKER_FEATURE = Tracker.find_by_id(2)
+        TRACKER_TASK = Tracker.find_by_id(4)
         DEFAULT_TRACKER = TRACKER_BUG
         TRACKER_MAPPING = {'defect' => TRACKER_BUG,
                            'enhancement' => TRACKER_FEATURE,
-                           'task' => TRACKER_FEATURE,
+                           'task' => TRACKER_TASK,
                            'patch' =>TRACKER_FEATURE
                            }
 
