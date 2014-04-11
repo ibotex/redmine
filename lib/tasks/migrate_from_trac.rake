@@ -27,13 +27,15 @@ namespace :redmine do
         TICKET_MAP = []
 
         DEFAULT_STATUS = IssueStatus.default
-        assigned_status = IssueStatus.find_by_position(2)
-        resolved_status = IssueStatus.find_by_position(3)
-        feedback_status = IssueStatus.find_by_position(4)
-        closed_status = IssueStatus.where(:is_closed => true).first
+        assigned_status = IssueStatus.find_by_id(10) #numbers from db!
+        resolved_status = IssueStatus.find_by_id(8)
+        feedback_status = IssueStatus.find_by_id(4)
+        accepted_status = IssueStatus.find_by_id(9)
+        closed_status = IssueStatus.find_by_id(5)
         STATUS_MAPPING = {'new' => DEFAULT_STATUS,
                           'reopened' => feedback_status,
                           'assigned' => assigned_status,
+                          'accepted' => accepted_status,
                           'closed' => closed_status
                           }
 
@@ -54,7 +56,7 @@ namespace :redmine do
 
         TRACKER_BUG = Tracker.find_by_id(1)
         TRACKER_FEATURE = Tracker.find_by_id(2)
-        TRACKER_TASK = Tracker.find_by_id(4)
+        TRACKER_TASK = Tracker.find_by_id(4)	#3 in most cases! see db!
         DEFAULT_TRACKER = TRACKER_BUG
         TRACKER_MAPPING = {'defect' => TRACKER_BUG,
                            'enhancement' => TRACKER_FEATURE,
