@@ -66,9 +66,9 @@ namespace :redmine do
                            }
 
         roles = Role.where(:builtin => 0).order('position ASC').all
-        manager_role = roles[0]
-        developer_role = roles[1]
-        DEFAULT_ROLE = roles.last
+        manager_role = roles[0] # 3 in db
+        developer_role = roles[2]  # maps to team
+        DEFAULT_ROLE = roles[3]  # maps to supporter
         ROLE_MAPPING = {'admin' => manager_role,
                         'developer' => developer_role
                         }
