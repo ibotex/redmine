@@ -77,12 +77,14 @@ module Redmine
           end
         end
 
-        def initialize(url, root_url=nil, login=nil, password=nil,
-                       path_encoding=nil)
+        def initialize(url, root_url=nil, login=nil, password=nil, path_encoding=nil, login_method=nil, security_token=nil, project=nil)
           @url = url
           @login = login if login && !login.empty?
           @password = (password || "") if @login
           @root_url = root_url.blank? ? retrieve_root_url : root_url
+          @login_method = login_method.blank? ? 0 : login_method
+          @security_token = security_token.blank? ? "" : security_token
+          @project = project
         end
 
         def adapter_name
@@ -95,6 +97,10 @@ module Redmine
 
         def supports_annotate?
           respond_to?('annotate')
+        end
+
+        def use_current_user
+          @use_current_user
         end
 
         def root_url

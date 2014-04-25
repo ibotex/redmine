@@ -313,6 +313,13 @@ en-GB:
   field_text: Text field
   field_visible: Visible
   field_warn_on_leaving_unsaved: "Warn me when leaving a page with unsaved text"
+  field_login_method: Authentication method
+  field_security_token: Security token
+  field_root_url: Root URL
+
+  repository_login_usernamepassword: Provided credentials
+  repository_login_current_username: Name of current user
+  repository_login_current_role: Role of current user
 
   setting_app_title: Application title
   setting_app_subtitle: Application subtitle

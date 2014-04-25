@@ -70,6 +70,7 @@ class RepositoriesController < ApplicationController
     end
     @repository.project = @project
     if request.put? && @repository.save
+      @repository.save
       redirect_to settings_project_path(@project, :tab => 'repositories')
     else
       render :action => 'edit'

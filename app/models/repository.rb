@@ -51,7 +51,10 @@ class Repository < ActiveRecord::Base
     'password',
     'path_encoding',
     'log_encoding',
-    'is_default'
+    'is_default',
+    'login_method',
+    'root_url',
+    'security_token'
 
   safe_attributes 'url',
     :if => lambda {|repository, user| repository.new_record?}
@@ -94,8 +97,7 @@ class Repository < ActiveRecord::Base
 
   def scm
     unless @scm
-      @scm = self.scm_adapter.new(url, root_url,
-                                  login, password, path_encoding)
+      @scm = self.scm_adapter.new(url, root_url, login, password, path_encoding, login_method, security_token, project)
       if root_url.blank? && @scm.root_url.present?
         update_attribute(:root_url, @scm.root_url)
       end

@@ -257,9 +257,32 @@ module Redmine
         private
 
         def credentials_string
-          str = ''
-          str << " --username #{shell_quote(@login)}" unless @login.blank?
-          str << " --password #{shell_quote(@password)}" unless @login.blank? || @password.blank?
+          if !(User.current.is_a?(AnonymousUser))
+
+            if (@login_method == 1)
+              str = ''
+              str << " --username #{shell_quote(User.current.login)}"
+              str << " --password #{shell_quote( (@security_token.blank? ? "foo" : @security_token) )}"   
+            end
+
+            if (@login_method == 2) && (!@project.nil?)
+              role = User.current.role_for_project(@project)
+
+              if !role.blank?
+                str = ''
+                str << " --username #{shell_quote(role.name)}"
+                str << " --password #{shell_quote( (@security_token.blank? ? "foo" : @security_token) )}"   
+              end
+            end
+
+          end
+
+          if (str.blank?)
+            str = ''
+            str << " --username #{shell_quote(@login)}" unless @login.blank?
+            str << " --password #{shell_quote(@password)}" unless @login.blank? || @password.blank?
+          end
+
           str << " --no-auth-cache --non-interactive"
           str
         end

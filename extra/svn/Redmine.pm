@@ -1,9 +1,14 @@
-package Apache::Authn::Redmine;
+package Apache::Redmine;
 
-=head1 Apache::Authn::Redmine
+=head1 Apache::Redmine
 
 Redmine - a mod_perl module to authenticate webdav subversion users
 against redmine database
+
+In addition this module allows to authenticate a redmine server
+for webdav subversion access, bypassing full authentication, still
+allowing to apply repository based security (e.g. .authz files)
+
 
 =head1 SYNOPSIS
 
@@ -37,8 +42,8 @@ Authen::Simple::LDAP (and IO::Socket::SSL if LDAPS is used):
 =head1 CONFIGURATION
 
    ## This module has to be in your perl path
-   ## eg:  /usr/lib/perl5/Apache/Authn/Redmine.pm
-   PerlLoadModule Apache::Authn::Redmine
+   ## eg:  /usr/lib/perl5/Apache/Redmine.pm
+   PerlLoadModule Apache::Redmine
    <Location /svn>
      DAV svn
      SVNParentPath "/var/svn"
@@ -47,8 +52,8 @@ Authen::Simple::LDAP (and IO::Socket::SSL if LDAPS is used):
      AuthName redmine
      Require valid-user
 
-     PerlAccessHandler Apache::Authn::Redmine::access_handler
-     PerlAuthenHandler Apache::Authn::Redmine::authen_handler
+     PerlAccessHandler Apache::Redmine::access_handler
+     PerlAuthenHandler Apache::Redmine::authen_handler
 
      ## for mysql
      RedmineDSN "DBI:mysql:database=databasename;host=my.db.server"
@@ -73,6 +78,16 @@ like that :
      Order deny,allow
      Deny from all
      # only allow reading orders
+
+     AuthType Basic
+     AuthName redmine
+     Require valid-user
+
+     PerlAccessHandler Apache::Redmine::redmine_access_handler
+     PerlAuthenHandler Apache::Redmine::redmine_authen_handler
+
+     RedmineSecurityToken "redmine"
+     
      <Limit GET PROPFIND OPTIONS REPORT>
        Allow from redmine.server.ip
      </Limit>
@@ -229,6 +244,11 @@ my @directives = (
     errmsg => 'RedmineCacheCredsMax must be decimal number',
   },
   {
+    name => 'RedmineSecurityToken',
+    req_override => OR_AUTHCFG,
+    args_how => TAKE1,
+    errmsg => 'RedmineSecurityToken additional authentication token',
+  },  {
     name => 'RedmineGitSmartHttp',
     req_override => OR_AUTHCFG,
     args_how => TAKE1,
@@ -256,6 +276,7 @@ sub RedmineDSN {
 
 sub RedmineDbUser { set_val('RedmineDbUser', @_); }
 sub RedmineDbPass { set_val('RedmineDbPass', @_); }
+sub RedmineSecurityToken { set_val('RedmineSecurityToken', @_); }
 sub RedmineDbWhereClause {
   my ($self, $parms, $arg) = @_;
   $self->{RedmineQuery} = trim($self->{RedmineQuery}.($arg ? $arg : "")." ");
@@ -319,7 +340,7 @@ sub access_handler {
   my $r = shift;
 
   unless ($r->some_auth_required) {
-      $r->log_reason("No authentication has been configured");
+      $r->log_reason("Apache::Redmine - No authentication has been configured in webserver (access_handler)");
       return FORBIDDEN;
   }
 
@@ -539,6 +560,45 @@ sub connect_database {
 
     my $cfg = Apache2::Module::get_config(__PACKAGE__, $r->server, $r->per_dir_config);
     return DBI->connect($cfg->{RedmineDSN}, $cfg->{RedmineDbUser}, $cfg->{RedmineDbPass});
+}
+
+sub redmine_access_handler {
+  my $r = shift;
+
+  unless ($r->some_auth_required) {
+      $r->log_reason("Apache::Redmine - No auth has been configured in vhost conf (redmine_access_handler)");
+      return FORBIDDEN;
+  }
+
+  my $method = $r->method;
+  return OK unless defined $read_only_methods{$method};
+
+  my $project_id = get_project_identifier($r);
+
+  $r->set_handlers(PerlAuthenHandler => [\&OK])
+      if is_public_project($project_id, $r);
+
+  return OK
+}
+
+sub redmine_authen_handler {
+  my $r = shift;
+
+  my ($res, $redmine_pass) =  $r->get_basic_auth_pw();
+  return $res unless $res == OK;
+
+  my $cfg = Apache2::Module::get_config(__PACKAGE__, $r->server, $r->per_dir_config);
+
+  if ($cfg->{RedmineSecurityToken}) {
+    my $securityToken = $cfg->{RedmineSecurityToken};
+
+    if ($securityToken ne $redmine_pass) {
+      $r->log_error("Apache::Redmine - Provided SecurityToken did not match (redmine_authen_handler)");
+      $r->note_auth_failure();
+      return AUTH_REQUIRED; 
+    }    
+  }  
+  return OK;
 }
 
 1;

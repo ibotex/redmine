@@ -150,17 +150,36 @@ module RepositoriesHelper
   end
 
   def subversion_field_tags(form, repository)
-      content_tag('p', form.text_field(:url, :size => 60, :required => true,
-                       :disabled => !repository.safe_attribute?('url')) +
-                       '<br />'.html_safe +
-                       '(file:///, http://, https://, svn://, svn+[tunnelscheme]://)') +
-      content_tag('p', form.text_field(:login, :size => 30)) +
-      content_tag('p', form.password_field(
-                            :password, :size => 30, :name => 'ignore',
-                            :value => ((repository.new_record? || repository.password.blank?) ? '' : ('x'*15)),
-                            :onfocus => "this.value=''; this.name='repository[password]';",
-                            :onchange => "this.name='repository[password]';"))
+    login_options = [["--- #{l(:actionview_instancetag_blank_option)} ---", '']]
+    login_options << [l("repository_login_usernamepassword"), 0] 
+    login_options << [l("repository_login_current_username"), 1] 
+    login_options << [l("repository_login_current_role"), 2] 
+
+    content_tag('p', form.text_field(:url, :size => 60, :required => true,
+                     :disabled => (repository && !repository.root_url.blank?)) +
+                     '<br />'.html_safe +
+                     '(file:///, http://, https://, svn://, svn+[tunnelscheme]://)') +
+    content_tag('p', form.text_field(:root_url, :size => 60) +
+                     '<br />'.html_safe + '(this needs to be set to the to the highest level in the SVN tree allowed if not the URL)') +
+    content_tag('p', form.select(:login_method, login_options) +
+                     '<br />'.html_safe +
+                     '(Where method is a current user, credentials should be provided for the authz access handler)') +
+    content_tag('p', form.text_field(:login, :size => 30)) +
+    content_tag('p', form.password_field(
+                          :password, :size => 30, :name => 'ignore',
+                          :value => ((repository.new_record? || repository.password.blank?) ? '' : ('x'*15)),
+                          :onfocus => "this.value=''; this.name='repository[password]';",
+                          :onchange => "this.name='repository[password]';")) +
+    content_tag('p', form.password_field(:security_token, :size => 30, :name => 'ignore',
+                          :value => ((repository.new_record? || repository.security_token.blank?) ? '' : ('x'*15)),
+                          :onfocus => "this.value=''; this.name='repository[security_token]';",
+                          :onchange => "this.name='repository[security_token]';") +
+                          '<br />'.html_safe +
+                          '(The security token for the authz access handler needed for current user logon methods)')
   end
+
+#  select_tag('login_method', options_for_select(login_method, repository.class.name.demodulize),
+#                     :onchange => remote_function(:url => { :controller => 'repositories', :action => 'edit', :id => @project }, :method => :get, :with => "Form.serialize(this.form)") ) +
 
   def darcs_field_tags(form, repository)
     content_tag('p', form.text_field(
